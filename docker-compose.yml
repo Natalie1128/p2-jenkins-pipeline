@@ -1,0 +1,32 @@
+services:
+
+  frontend:
+    depends_on:
+      - employee-backend
+      - manager-backend
+    build: ./web_app
+    ports:
+      - "5173:5173"
+
+  employee-backend:
+    build: ./employee_app
+    ports:
+      - "8080:8080"
+    volumes:
+      - "sqlite_data:/var/lib/sqlite/data"
+    environment:
+      DATABASE_URL: "/var/lib/sqlite/data/expenses_system_db.db"
+      CONTAINER: "DOCKER"
+
+  manager-backend:
+    build: ./manager_app
+    ports:
+      - "9090:9090"
+    volumes:
+      - "sqlite_data:/var/lib/sqlite/data"
+    environment:
+      DATABASE_URL: "/var/lib/sqlite/data/expenses_system_db.db"
+      CONTAINER: "DOCKER"
+
+volumes:
+  sqlite_data:

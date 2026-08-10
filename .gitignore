@@ -1,0 +1,27 @@
+# Python
+venv/
+.venv/
+__pycache__/
+**/__pycache__/
+
+# Local databases
+*.db
+
+# IDE/editor files
+.vscode/
+
+# Java/Maven build output
+.idea/
+*.class
+manager_app/bin/
+manager_app/target/
+
+#allure results
+allure-results/
+allure-report/
+combined-allure-results/
+
+# DS Store
+*.DS_Store
+
+employee_app/.coverage
