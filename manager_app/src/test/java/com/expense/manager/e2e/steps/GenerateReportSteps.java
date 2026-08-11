@@ -7,6 +7,7 @@ import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 
 import org.openqa.selenium.By;
+import org.openqa.selenium.HasDownloads;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
@@ -16,6 +17,7 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.Duration;
 import java.util.List;
 
@@ -143,43 +145,57 @@ public class GenerateReportSteps {
     public void report_should_contain_expenses() throws IOException {
 
 
-        // FIXED: Downloads spelling
-        File downloadFolder = new File(
-                System.getProperty("user.home") + "/Downloads"
-        );
+        List<String> lines;
 
+        if (System.getenv("SELENIUM_URL") != null) {
 
-        assertTrue(
-                downloadFolder.exists(),
-                "Download folder was not found"
-        );
+            HasDownloads downloads = (HasDownloads) driver;
 
+            String remoteFile = wait.until(d -> downloads.getDownloadableFiles().stream()
+                    .filter(name -> name.endsWith("-summary.csv"))
+                    .reduce((first, second) -> second)
+                    .orElse(null));
 
-        File[] csvFiles = wait.until(d -> {
-            File[] files = downloadFolder.listFiles(
-                    (dir, name) -> name.endsWith("-summary.csv")
+            assertNotNull(remoteFile,
+                    "No csv report was generated"
             );
-            return (files != null && files.length > 0) ? files : null;
-        });
 
+            Path targetDir = Files.createTempDirectory("report");
+            downloads.downloadFile(remoteFile, targetDir);
 
-        assertNotNull(csvFiles,
-                "Could not access download files"
-        );
+            lines = Files.readAllLines(targetDir.resolve(remoteFile));
 
+        } else {
 
-        assertTrue(
-                csvFiles.length > 0,
-                "No csv report was generated"
-        );
+            File downloadFolder = new File(
+                    System.getProperty("user.home") + "/Downloads"
+            );
 
+            assertTrue(
+                    downloadFolder.exists(),
+                    "Download folder was not found"
+            );
 
-        File report = csvFiles[csvFiles.length - 1];
+            File[] csvFiles = wait.until(d -> {
+                File[] files = downloadFolder.listFiles(
+                        (dir, name) -> name.endsWith("-summary.csv")
+                );
+                return (files != null && files.length > 0) ? files : null;
+            });
 
+            assertNotNull(csvFiles,
+                    "Could not access download files"
+            );
 
-        List<String> lines = Files.readAllLines(
-                report.toPath()
-        );
+            assertTrue(
+                    csvFiles.length > 0,
+                    "No csv report was generated"
+            );
+
+            File report = csvFiles[csvFiles.length - 1];
+
+            lines = Files.readAllLines(report.toPath());
+        }
 
 
         assertFalse(

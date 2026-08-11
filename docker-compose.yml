@@ -28,5 +28,21 @@ services:
       DATABASE_URL: "/var/lib/sqlite/data/expenses_system_db.db"
       CONTAINER: "DOCKER"
 
+  selenium:
+    image: selenium/standalone-chrome
+    network_mode: host
+    shm_size: 2gb
+
+  manager-test:
+    build:
+      context: ./manager_app
+      dockerfile: Dockerfile.test
+    network_mode: host
+    environment:
+      HEADLESS: "true"
+      SELENIUM_URL: "http://localhost:4444"
+    profiles:
+      - test
+
 volumes:
   sqlite_data:

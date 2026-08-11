@@ -25,6 +25,7 @@ public class Hooks {
         }
         String seleniumUrl = System.getenv("SELENIUM_URL");
         if (seleniumUrl != null) {
+            options.setCapability("se:downloadsEnabled", true);
             driver = new RemoteWebDriver(new URL(seleniumUrl), options);
         } else {
             driver = new ChromeDriver(options);

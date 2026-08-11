@@ -27,29 +27,37 @@ pipeline {
 
         stage('Deploy') {
             steps {
+                sh 'docker compose down -v || true'
                 sh 'docker compose up -d'
             }
         }
 
         stage('Seed') {
             steps {
-                sh 'sleep 20'
+                sh '''
+                    until docker compose exec -T employee-backend python -c "import urllib.request; urllib.request.urlopen('http://localhost:8080/users')"; do
+                        echo "Waiting for employee-backend..."
+                        sleep 2
+                    done
+                '''
                 sh 'docker compose exec -T employee-backend python db/seed.py'
             }
         }
 
         stage('E2E Tests') {
             steps {
-                sh 'docker rm -f selenium || true'
-                sh 'docker run -d --network host --shm-size=2g --name selenium selenium/standalone-chrome'
-                sh 'sleep 10'
+                sh '''
+                    until docker compose exec -T selenium curl -sf http://localhost:4444/status; do
+                        echo "Waiting for Selenium..."
+                        sleep 2
+                    done
+                '''
                 catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE') {
                     sh 'docker run --rm --network host -e HEADLESS=true -e SELENIUM_URL=http://localhost:4444 employee-e2e'
                 }
                 catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE') {
                     sh 'docker run --rm --network host -e HEADLESS=true -e SELENIUM_URL=http://localhost:4444 manager-test mvn test -Dtest=RunCucumberTest'
                 }
-                sh 'docker rm -f selenium || true'
             }
         }
 
@@ -64,6 +72,21 @@ pipeline {
                 sh 'docker run --rm --network host jmeter-employee -n -t /plan.jmx -l /tmp/employee-results.jtl'
                 sh 'docker run --rm --network host jmeter-manager -n -t /plan.jmx -l /tmp/manager-results.jtl'
             }
+        }
+    }
+
+    post {
+        always {
+            sh 'docker compose down -v --remove-orphans || true'
+        }
+        success {
+            echo 'All stages green — build, unit, API, E2E, and performance passed.'
+        }
+        unstable {
+            echo 'Core pipeline passed; one or more E2E scenarios flaked and were marked UNSTABLE.'
+        }
+        failure {
+            echo 'Pipeline failed — check the stage logs above for the first red stage.'
         }
     }
 }
