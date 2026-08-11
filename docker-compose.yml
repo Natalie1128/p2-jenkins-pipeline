@@ -44,5 +44,30 @@ services:
     profiles:
       - test
 
+  employee-e2e:
+    build:
+      context: ./employee_app
+      dockerfile: Dockerfile.e2e
+    network_mode: host
+    environment:
+      HEADLESS: "true"
+      SELENIUM_URL: "http://localhost:4444"
+    profiles:
+      - test
+
+  jmeter-employee:
+    build: ./employee_app/tests/jmeter
+    network_mode: host
+    command: ["-n", "-t", "/plan.jmx", "-l", "/tmp/employee-results.jtl"]
+    profiles:
+      - test
+
+  jmeter-manager:
+    build: ./manager_app/src/test/java/com/expense/manager/jmeter
+    network_mode: host
+    command: ["-n", "-t", "/plan.jmx", "-l", "/tmp/manager-results.jtl"]
+    profiles:
+      - test
+
 volumes:
   sqlite_data:
