@@ -17,7 +17,12 @@ DB_FILE = os.path.join(REPO_ROOT, "expenses_system_db.db")
 
 def before_all(context):
     context.base_url = BASE_URL
-    context.driver = webdriver.Chrome()
+    options = webdriver.ChromeOptions()
+    if os.environ.get("HEADLESS") == "true":
+        options.add_argument("--headless=new")
+        options.add_argument("--no-sandbox")
+        options.add_argument("--disable-dev-shm-usage")
+    context.driver = webdriver.Chrome(options=options)
     context.driver.implicitly_wait(5)
 
 

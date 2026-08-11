@@ -155,9 +155,12 @@ public class GenerateReportSteps {
         );
 
 
-        File[] csvFiles = downloadFolder.listFiles(
-                (dir, name) -> name.endsWith("-summary.csv")
-        );
+        File[] csvFiles = wait.until(d -> {
+            File[] files = downloadFolder.listFiles(
+                    (dir, name) -> name.endsWith("-summary.csv")
+            );
+            return (files != null && files.length > 0) ? files : null;
+        });
 
 
         assertNotNull(csvFiles,
