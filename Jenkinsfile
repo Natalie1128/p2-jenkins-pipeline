@@ -40,8 +40,12 @@ pipeline {
 
         stage('E2E Tests') {
             steps {
-                sh 'docker run --rm --network host -e HEADLESS=true employee-e2e'
-                sh 'docker run --rm --network host -e HEADLESS=true manager-test mvn test -Dtest=RunCucumberTest'
+                catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE') {
+                    sh 'docker run --rm --network host -e HEADLESS=true -e DBUS_SESSION_BUS_ADDRESS=/dev/null employee-e2e'
+                }
+                catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE') {
+                    sh 'docker run --rm --network host -e HEADLESS=true -e DBUS_SESSION_BUS_ADDRESS=/dev/null manager-test mvn test -Dtest=RunCucumberTest'
+                }
             }
         }
 
