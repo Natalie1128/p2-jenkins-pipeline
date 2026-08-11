@@ -23,7 +23,11 @@ def before_all(context):
         options.add_argument("--no-sandbox")
         options.add_argument("--disable-dev-shm-usage")
         options.add_argument("--disable-gpu")
-    context.driver = webdriver.Chrome(options=options)
+    selenium_url = os.environ.get("SELENIUM_URL")
+    if selenium_url:
+        context.driver = webdriver.Remote(command_executor=selenium_url, options=options)
+    else:
+        context.driver = webdriver.Chrome(options=options)
     context.driver.implicitly_wait(5)
 
 
