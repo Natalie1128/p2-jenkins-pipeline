@@ -17,7 +17,7 @@ pipeline {
         stage('Unit Tests') {
             steps {
                 sh 'docker compose run --rm employee-backend python -m pytest -q'
-                sh 'docker compose run --rm manager-test mvn -q test'
+                sh 'docker compose run --rm manager-test mvn test'
             }
         }
 
@@ -52,14 +52,14 @@ pipeline {
                     sh 'docker compose run --rm employee-e2e'
                 }
                 catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE') {
-                    sh 'docker compose run --rm manager-test mvn -q test -Dtest=RunCucumberTest'
+                    sh 'docker compose run --rm manager-test mvn test -Dtest=RunCucumberTest'
                 }
             }
         }
 
         stage('API Tests') {
             steps {
-                sh 'docker compose run --rm manager-test mvn -q test -Dtest="com.expense.manager.app.*APITest"'
+                sh 'docker compose run --rm manager-test mvn test -Dtest="com.expense.manager.app.*APITest"'
             }
         }
 
