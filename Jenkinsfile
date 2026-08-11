@@ -47,7 +47,7 @@ pipeline {
                     sh 'docker run --rm --network host -e HEADLESS=true -e SELENIUM_URL=http://localhost:4444 employee-e2e'
                 }
                 catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE') {
-                    sh 'docker run --rm --network host -e HEADLESS=true -e DBUS_SESSION_BUS_ADDRESS=/dev/null manager-test mvn test -Dtest=RunCucumberTest'
+                    sh 'docker run --rm --network host -e HEADLESS=true -e SELENIUM_URL=http://localhost:4444 manager-test mvn test -Dtest=RunCucumberTest'
                 }
                 sh 'docker rm -f selenium || true'
             }
