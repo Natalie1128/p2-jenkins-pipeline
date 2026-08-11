@@ -151,7 +151,9 @@ public class GenerateReportSteps {
 
             HasDownloads downloads = (HasDownloads) driver;
 
-            String remoteFile = wait.until(d -> downloads.getDownloadableFiles().stream()
+            WebDriverWait downloadWait = new WebDriverWait(driver, Duration.ofSeconds(30));
+
+            String remoteFile = downloadWait.until(d -> downloads.getDownloadableFiles().stream()
                     .filter(name -> name.endsWith("-summary.csv"))
                     .reduce((first, second) -> second)
                     .orElse(null));
