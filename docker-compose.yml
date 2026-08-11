@@ -10,6 +10,7 @@ services:
 
   employee-backend:
     build: ./employee_app
+    image: employee-app
     ports:
       - "8080:8080"
     volumes:
@@ -45,9 +46,9 @@ services:
       - test
 
   employee-e2e:
-    build:
-      context: ./employee_app
-      dockerfile: Dockerfile.e2e
+    image: employee-app
+    working_dir: /employee_app/e2e
+    command: behave
     network_mode: host
     environment:
       HEADLESS: "true"
