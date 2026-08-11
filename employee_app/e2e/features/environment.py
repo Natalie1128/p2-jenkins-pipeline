@@ -18,11 +18,6 @@ DB_FILE = os.path.join(REPO_ROOT, "expenses_system_db.db")
 def before_all(context):
     context.base_url = BASE_URL
     options = webdriver.ChromeOptions()
-    if os.environ.get("HEADLESS") == "true":
-        options.add_argument("--headless=new")
-        options.add_argument("--no-sandbox")
-        options.add_argument("--disable-dev-shm-usage")
-        options.add_argument("--disable-gpu")
     selenium_url = os.environ.get("SELENIUM_URL")
     if selenium_url:
         context.driver = webdriver.Remote(command_executor=selenium_url, options=options)

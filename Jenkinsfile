@@ -41,7 +41,7 @@ pipeline {
         stage('E2E Tests') {
             steps {
                 sh 'docker rm -f selenium || true'
-                sh 'docker run -d --network host --name selenium selenium/standalone-chrome'
+                sh 'docker run -d --network host --shm-size=2g --name selenium selenium/standalone-chrome'
                 sh 'sleep 10'
                 catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE') {
                     sh 'docker run --rm --network host -e HEADLESS=true -e SELENIUM_URL=http://localhost:4444 employee-e2e'
